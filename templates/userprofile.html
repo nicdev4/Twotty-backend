@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load format_date %}
+{% block additional_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'user.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'modal.css' %}"/>
+    <link rel="stylesheet" href="{% static 'alertify/css/alertify.css' %}"/>
+    <script type="text/javascript" src="{% static 'alertify/alertify.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'modal.js' %}"></script>
+{% endblock %}
+{% block content %}
+    {% if owner %}
+        <div class="modal__contents">
+            <div class="modal" id="change_photo_modal">
+                <h2>Загрузить изображение профиля</h2>
+                <p>Выберите файл, нажмите кнопку "загрузить" и изображение профиля отобразится на вашей странице.</p>
+                <form method="post">
+                    {{ change_photo_form }}
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            const modal = new Modal('#change_photo_modal');
+        </script>
+    {% endif %}
+    <div class="userprofile__content">
+        <div class="userprofile__container">
+            {% if owner %}
+                <div class="change-photo-container">
+                    <img src="{{ query_userdata.UserPicture.url }}"/>
+                    <button class="hidden-element" id="open-photo-modal">
+                        <span>Сменить фото</span>
+                    </button>
+                </div>
+                <script type="text/javascript">
+                document.getElementById('open-photo-modal').addEventListener('click', (e) => {
+                   e.preventDefault();
+                   modal.changeModalState();
+                });
+                </script>
+                <div class="name__container">
+                    <span class="name">{{ query_user.first_name }} {{ query_user.last_name }}</span>
+                    <span class="username">@{{ query_user.username }}</span>
+                </div>
+                <div class="manage">
+                    <a class="btn" href="/logout">Выход из аккаунта</a>
+                </div>
+            {% else %}
+                <img src="{{ query_userdata.UserPicture.url }}"/>
+                <div class="name__container">
+                    <span class="name">{{ query_user.first_name }} {{ query_user.last_name }}</span>
+                    <span class="username">@{{ query_user.username }}</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="userprofile__posts">
+            {% if owner %}
+                <div class="post-form">
+                    <div class="head">
+                        <img src="{{ userdata.UserPicture.url }}"/>
+                        <span class="username">@{{ user.username }}</span>
+                    </div>
+                    <textarea id="twot-text" placeholder="Начните вводить ваш невероятный твот." type="text"></textarea>
+                    <button id="send">Отправить твот</button>
+                    <span class="warning"><b>Помните!</b> Все, что попадает в Twotty, остается в Twotty. Удалить пост невозможно!</span>
+                    <script type="text/javascript">
+                        document.getElementById('send').addEventListener('click', (e) => {
+                           e.preventDefault();
+                           const xhr = new XMLHttpRequest();
+                           xhr.open("POST", "/send/");
+                           xhr.responseType = "json";
+                           const body = "text="+encodeURIComponent(document.getElementById('twot-text').value);
+                           xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                           xhr.onload = () => {
+                              if (xhr.readyState == 4 && xhr.status == 200) {
+                                let data = xhr.response;
+                                if(data["status"] === "ok"){
+                                    window.location.replace("/user/{{ user.username }}");
+                                } else {
+                                    alertify.error(data.content.text);
+                                }
+                              } else {
+                                alertify.error("Произошла ошибка. Попробуйте позже.");
+                              }
+                            };
+                           xhr.send(body);
+                        });
+                    </script>
+                </div>
+            {% endif %}
+            <div class="posts">
+                {% if twots_count < 1 %}
+                    <span class="centred-message">Кажется, тут еще ничего нет ;(</span>
+                {% else %}
+                    {% for twot in twots %}
+                        <div class="twot">
+                            <div class="head">
+                                <img src="{{ query_userdata.UserPicture.url }}"/>
+                                <span class="username">@{{ query_user.username }}</span>
+                                <span class="date">{{ twot.date|format_date }}</span>
+                            </div>
+                            <div class="body">
+                                <div class="text">
+                                    {{ twot.text }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

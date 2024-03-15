@@ -1,0 +1,29 @@
+.modal__contents{
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    backdrop-filter: blur(4px);
+    transition: 0.5s opacity;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal__contents.active{
+    opacity: 1;
+}
+
+.modal__contents .modal{
+    width: 512px;
+    height: auto;
+    background: white;
+    box-sizing: border-box;
+    padding: 24px;
+    margin: 64px auto auto;
+}
+.modal__contents .modal h2{
+    display: block;
+    width: 100%;
+    font-size: 20px;
+    font-weight: 600;
+}

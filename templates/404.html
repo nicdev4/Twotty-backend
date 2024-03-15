@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block additional_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'exceptions.css' %}"/>
+{% endblock %}
+{% block content %}
+    <div class="exception__content">
+        <h2>Ошибка 404: Не найдено</h2>
+        <p>Если эта ошибка возникла беспричинно, обратитесь в поддержку: support@twotty.by</p>
+    </div>
+{% endblock %}

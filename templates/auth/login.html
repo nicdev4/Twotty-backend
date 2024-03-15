@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block additional_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'auth.css' %}"/>
+{% endblock %}
+{% block content %}
+    <div class="login__container">
+        <div class="login__form">
+            <form method="POST" name="login-form" action="procceed">
+                <div class="input-line">
+                    <label>Логин</label>
+                    <input type="email" id="login-input" placeholder="Введите email">
+                </div>
+                <div class="input-line">
+                    <label>Пароль</label>
+                    <input type="password" id="password-input" placeholder="Введите пароль">
+                </div>
+                <button id="submit-form">Войти</button>
+                <b id="error" class="error"></b>
+            </form>
+            <script type="text/javascript">
+                document.getElementById("submit-form").addEventListener('click', (e) => {
+                   e.preventDefault();
+                   const xhr = new XMLHttpRequest();
+                   xhr.open("POST", "/login/procceed/");
+                   xhr.responseType = "json";
+                   const body = "email="+encodeURIComponent(document.getElementById('login-input').value)
+                       +"&password="+encodeURIComponent(document.getElementById('password-input').value);
+                   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                   xhr.onload = () => {
+                      if (xhr.readyState == 4 && xhr.status == 200) {
+                        let data = xhr.response;
+                        if(data["status"] === "ok"){
+                            window.location.replace("/user/"+data.content.username);
+                        } else {
+                            document.getElementById('error').innerHTML = data.content.text;
+                        }
+                      } else {
+                        document.getElementById("error").innerHTML = "Произошла ошибка. Попробуйте позже.";
+                      }
+                    };
+                   xhr.send(body);
+                });
+            </script>
+        </div>
+        <div class="login__desc">
+            <h2>Откройте безграничный мир общения с <span>Twotty</span></h2>
+            <p>Создайте аккаунт, и вы сможете общаться с друзьями с помощью наших постов.</p>
+        </div>
+    </div>
+{% endblock %}
